@@ -15,6 +15,7 @@ library(ggsn) ##scale bar: http://oswaldosantos.github.io/ggsn/ ;
 Map <- read_csv("data/OsHV1map_08April2023.csv")
 glimpse(Map)
 
+
 ## unique species
 unique(Map$Paper) #35
 unique(Map$Country) #19
