@@ -20,10 +20,12 @@ library(viridis)
 
 ```{r}
 # Importing data
-df <- read_csv("data/OsHV1infections_13Jul2023.csv", show_col_types = FALSE)
+df <- read_csv("OsHV1infections_13Jul2023.csv", show_col_types = FALSE)
 
 df <- df %>% 
   distinct(Paper, .keep_all = TRUE) 
+
+View(df)
 
 ```
 
@@ -46,7 +48,7 @@ df %>%
   hc_add_theme(hc_theme_monokai()) %>% 
   hc_tooltip(pointFormat =
     '<b>Number of Detections: </b> {point.y} <br>') %>% 
-  hc_title(text = 'Total Herpesvirus Detections',
+  hc_title(text = 'Total OsHV-1 Detections',
            style = list(fontSize = '25px', fontWeight = 'bold')) %>% 
   hc_subtitle(text = 'By Country',
               style = list(fontSize = '16px')) %>% 
@@ -54,9 +56,7 @@ df %>%
 
 ```
 
-## Column {data-width="350"}
-
-### Herpesvirus infections by type
+### OsHV-1 Infections By Type
 
 ```{r}
 ### Colors
@@ -71,16 +71,56 @@ df %>%
   hc_add_theme(hc_theme_monokai()) %>% 
   hc_tooltip(pointFormat =
     '<b>Number of Detections: </b> {point.y} <br>') %>% 
-  hc_title(text = 'Total Detections',
+  hc_title(text = 'Total OsHV-1 Detections',
            style = list(fontSize = '25px', fontWeight = 'bold')) %>% 
   hc_subtitle(text = 'By Type',
               style = list(fontSize = '16px')) %>% 
   hc_credits(enabled = TRUE, text = 'Compiled by Shukla et al. in prep')
 
 ```
+## Column {data-width="350"}
 
-### Chart C
+### OsHV-1 by Taxa
 
 ```{r}
+### {.no-padding data-height=350}
 
+# Colors
+custom_colors <- viridis::magma(n = 10)
+
+# Most common genre
+df %>% 
+  group_by(Taxa) %>% 
+  summarise(count = n()) %>% 
+  hchart('pie', hcaes(x = Taxa, y = count, color = custom_colors)) %>% 
+  hc_add_theme(hc_theme_google()) %>% 
+  hc_tooltip(pointFormat='<b>Proportion: </b> {point.percentage:,.2f}%') %>% 
+  hc_title(text = 'Taxa where OsHV-1 was detected',
+           style = list(fontSize = '15px', fontWeight = 'bold')) %>% 
+  hc_credits(enabled = TRUE, text = 'Compiled by Shukla et al.')
+
+```
+
+### Publications Documenting OsHV-1 Detections
+
+```{r}
+df1 <- df %>% 
+  arrange(Year_Published) %>% 
+  select(Paper, Title)
+
+# HTML table
+div(style = 'height:600px; overflow-y:scroll', gt(df1) %>% 
+      tab_header(title = md('Studies with OsHV-1 Detections'),
+                 subtitle = md('Chronological Order')) %>% 
+      opt_table_font(font = list(google_font('Chivo'), default_fonts())) %>% 
+      tab_style(location = cells_column_labels(columns = everything()),
+                style = list(cell_borders(sides = 'bottom', 
+                                          weight = px(2)), 
+                             cell_text(weight = 'bold'))) %>% 
+      tab_options(table.font.size = px(12L),
+                  table.border.top.style = 'none',
+                  column_labels.border.bottom.width = 2,
+                  table_body.border.top.style = 'none',
+                  data_row.padding = px(3))
+    )
 ```
