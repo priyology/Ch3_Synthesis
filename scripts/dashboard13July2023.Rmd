@@ -20,7 +20,7 @@ library(viridis)
 
 ```{r}
 # Importing data
-df <- read_csv("OsHV1infections_13Jul2023.csv", show_col_types = FALSE)
+df <- read_csv("dashboard_data/OsHV1infections_13Jul2023.csv", show_col_types = FALSE)
 
 df <- df %>% 
   distinct(Paper, .keep_all = TRUE) 
