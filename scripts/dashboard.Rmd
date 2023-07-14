@@ -1,0 +1,86 @@
+---
+title: "OsHV-1 Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(highcharter)
+library(gt)
+library(htmltools)
+library(viridis)
+
+##Youtube Tutorial: https://www.youtube.com/watch?v=fkqD9kcvCkU
+
+```
+
+```{r}
+# Importing data
+df <- read_csv("data/OsHV1infections_13Jul2023.csv", show_col_types = FALSE)
+
+df <- df %>% 
+  distinct(Paper, .keep_all = TRUE) 
+
+```
+
+# OsHV-1 Infections
+
+## Column {.tabset .tabset-fade data-width="650"}
+
+### OsHV-1 By Country
+
+```{r}
+### Colors
+custom_colors <- viridis::magma(n = 17)
+
+### Countries where OsHV-1 has been detected
+df %>% 
+  group_by(Country) %>%
+  reframe(count = n()) %>% 
+  arrange(desc(count)) %>% 
+  hchart('column', hcaes(x = Country, y = count, color = custom_colors)) %>% 
+  hc_add_theme(hc_theme_monokai()) %>% 
+  hc_tooltip(pointFormat =
+    '<b>Number of Detections: </b> {point.y} <br>') %>% 
+  hc_title(text = 'Total Herpesvirus Detections',
+           style = list(fontSize = '25px', fontWeight = 'bold')) %>% 
+  hc_subtitle(text = 'By Country',
+              style = list(fontSize = '16px')) %>% 
+  hc_credits(enabled = TRUE, text = 'Compiled by Shukla et al. in prep')
+
+```
+
+## Column {data-width="350"}
+
+### Herpesvirus infections by type
+
+```{r}
+### Colors
+custom_colors <- viridis::magma(n = 7)
+
+### Types of Herpesvirus detections & how many
+df %>% 
+  group_by(OsHV_var) %>%
+  reframe(count = n()) %>% 
+  arrange(desc(count)) %>% 
+  hchart('bar', hcaes(x = OsHV_var, y = count, color = custom_colors)) %>% 
+  hc_add_theme(hc_theme_monokai()) %>% 
+  hc_tooltip(pointFormat =
+    '<b>Number of Detections: </b> {point.y} <br>') %>% 
+  hc_title(text = 'Total Detections',
+           style = list(fontSize = '25px', fontWeight = 'bold')) %>% 
+  hc_subtitle(text = 'By Type',
+              style = list(fontSize = '16px')) %>% 
+  hc_credits(enabled = TRUE, text = 'Compiled by Shukla et al. in prep')
+
+```
+
+### Chart C
+
+```{r}
+
+```
