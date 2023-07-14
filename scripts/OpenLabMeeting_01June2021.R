@@ -51,6 +51,7 @@ degree_days(T_min=7, T_max=14, LDT=12, UDT=33, method="single.triangulation")
 
 # See 'DegreeDaysCode_TrenchR.R for this to work since package won't install
 
+df <- read.delim(source("degree"))
 
 ## location of study
 
