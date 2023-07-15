@@ -18,40 +18,26 @@ glimpse(OsHV1)
 
 #### Other spp. ====
 Spp <- OsHV1 %>% 
-  filter(Taxa != "Pacific Oyster")
+  filter(Taxa != "Pacific Oyster",
+         Country != "NA")
 
 ## unique species
-unique(Spp$Paper) #39
-unique(Spp$Country) #16
-unique(Spp$Species) #29
-unique(Spp$Taxa) #12
-
-
-
-#### Filter out M. gigas ====
-
-Spp.NoGigas <- Spp %>% 
-  filter(Species != "Magallana gigas",
-         !is.na(Country))
-
-colSums(is.na(Spp.NoGigas))
-
-## unique species w/o M. gigas
-unique(Spp.NoGigas$Paper) #39
-unique(Spp.NoGigas$Country) #14
-unique(Spp.NoGigas$Species) #28
-unique(Spp.NoGigas$Taxa) #9
+unique(Spp$Paper) #50
+unique(Spp$Country) #15
+unique(Spp$Species) #37
+unique(Spp$Taxa) #13
+unique(Spp$Paper)
 
 
 #### Plot Count of Other taxa ====
 library(ggdark)
 
-Reservoirs.Plot <-  Spp.NoGigas %>% 
+Reservoirs.Plot <-  Spp %>% 
   group_by(Taxa) %>% 
   summarize(count = n()) %>% 
   ggplot(aes(x = Taxa, y = count, fill = Taxa)) +
   geom_bar(stat = "identity") +
-  dark_theme_classic()
+  theme_classic()
 
 Reservoirs.Plot
 
@@ -92,31 +78,33 @@ unlink(TEMP_FILE)
 #### OsHV-1 Var Type Plot==============
 
 ## "Other Oyster" species
-Spp.NoGigas %>% 
-  filter(Taxa == "Other Oyster") %>% 
-  reframe(Ostreids = unique(Species))
+Spp.OsHVonly <- Spp %>% 
+  filter(OsHV_var == "OsHV-1" | OsHV_var == "OsHV-1 μVar" | OsHV_var == "OsHV-1 non-μvar variant")
 
-## OsHV-1 type
-Var.Plot <-  Spp.NoGigas %>%
-  filter(Species != "Magallana gigas") %>% 
-  group_by(Taxa, OsHV1_var) %>% 
+unique(Spp.OsHVonly$Country)
+
+SppCountry.Plot <- Spp.OsHVonly %>%
+  group_by(Country, OsHV_var) %>%
+  #filter(OsHV_var != "Herpesvirus" | OsHV_var != "Herpes-like virus" | OsHV_var != "AVNV") %>%   
   reframe(count = n()) %>% 
-  ggplot(aes(x = Taxa, y = count, fill = OsHV1_var, group = OsHV1_var)) +
+  ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
   geom_bar(stat = "identity", position = position_dodge()) +
-  dark_theme_classic()
+  scale_fill_manual(values=c("#FDAE61", "#D53E4F")) +
+  theme_classic()
 
-Var.Plot
+SppCountry.Plot
+
 
 #### ** PPT: OsHV-1 VarType Plot ==============
 
 #### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
 library(officer)
 ## initialize R object representing .pptx file. 
-Var.Plot_fig <- read_pptx()
-Var.Plot_fig <- add_slide(Var.Plot_fig , layout = "Title and Content", master = "Office Theme")
-Var.Plot_fig <-  ph_with(x = Var.Plot_fig, value = Var.Plot, location = ph_location_fullsize() )
-Var.Plot_fig  <- ph_with(x = Var.Plot_fig, "Plot", location = ph_location_type(type = "title") )
-print(Var.Plot_fig, target = "presentations/plot.pptx")
+SppCountry.Plot_fig <- read_pptx()
+SppCountry.Plot_fig <- add_slide(SppCountry.Plot_fig , layout = "Title and Content", master = "Office Theme")
+SppCountry.Plot_fig <-  ph_with(x = SppCountry.Plot_fig, value = SppCountry.Plot, location = ph_location_fullsize() )
+SppCountry.Plot_fig  <- ph_with(x = SppCountry.Plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(SppCountry.Plot_fig, target = "presentations/plot.pptx")
 
 #### R2PPT / RDCOMClient =====
 
@@ -127,7 +115,7 @@ library(R2PPT)
 
 ## Step 1: Save as a temporary file
 TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
-ggsave(TEMP_FILE, plot = Var.Plot) # Saving the plot to the temporary file
+ggsave(TEMP_FILE, plot = SppCountry.Plot) # Saving the plot to the temporary file
 
 
 ## Step 2: Open a blank PPT slide
@@ -145,16 +133,16 @@ unlink(TEMP_FILE)
 ######## Map of OsHV-1 Reservoirs ==========================
 
 ### latitudes
-Spp_lat <- Spp.NoGigas$GPS_lat
+Spp_lat <- Spp$GPS_lat
 Spp_lat
 
 ### longitudes
-Spp_long <- Spp.NoGigas$GPS_long
+Spp_long <- Spp$GPS_long
 Spp_long
 
 #### OsHV-1 coords ==============
 
-OsHV1_coord <- Spp.NoGigas %>% 
+OsHV1_coord <- Spp %>% 
   filter(OsHV1_var == "OsHV-1")
 
 OsHV1_coord
@@ -174,7 +162,7 @@ nonVarSites.df <- data.frame(
 glimpse(nonVarSites.df)
 
 #### OsHV-1 uvar data ==============
-OsHV1Var_coord <- Spp.NoGigas %>% 
+OsHV1Var_coord <- Spp %>% 
   filter(OsHV1_var != "OsHV-1")
 
 ### latitudes
