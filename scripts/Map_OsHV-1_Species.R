@@ -13,8 +13,12 @@ library(ggsn) ##scale bar: http://oswaldosantos.github.io/ggsn/ ;
 ## ggmap intro: https://appsilon.com/r-ggmap/
 
 #### load data ==============
-Spp <- read_csv("data/OsHV1reservoirs_08April2023.csv")
-glimpse(Spp)
+OsHV1 <- read_csv("data/OsHV1infections_14Jul2023.csv")
+glimpse(OsHV1)
+
+#### Other spp. ====
+Spp <- OsHV1 %>% 
+  filter(Taxa != "Pacific Oyster")
 
 ## unique species
 unique(Spp$Paper) #39

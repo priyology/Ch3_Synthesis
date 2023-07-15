@@ -1,55 +1,50 @@
-######### Global Map of OsHV-1 Detections ================================
+######### Global Mgigas of OsHV-1 Detections ================================
 
-######### PRESENTATION-READY MAP ==============================
+######### PRESENTATION-READY Mgigas ==============================
 library(tidyverse)
 library(ggplot2)
-library(ggmap)
-library(maps)
-library(mapdata)
-library(maptools) ##scalebar
+library(ggMgigas)
+library(Mgigass)
+library(Mgigasdata)
+library(Mgigastools) ##scalebar
 library(ggsn) ##scale bar: http://oswaldosantos.github.io/ggsn/ ; 
 
-## ggmap intro: https://appsilon.com/r-ggmap/
+## ggMgigas intro: https://appsilon.com/r-ggMgigas/
 
 #### load data ==============
-Map <- read_csv("data/OsHV1map_08April2023.csv")
-glimpse(Map)
+OsHV1 <- read_csv("data/OsHV1infections_14Jul2023.csv")
+glimpse(OsHV1)
 
+Mgigas <- OsHV1 %>% 
+  filter(Taxa == "Pacific Oyster",
+         Country != "NA")
 
 ## unique species
-unique(Map$Paper) #35
-unique(Map$Country) #19
-unique(Map$Species) #10
+unique(Mgigas$Paper) #79
+unique(Mgigas$Country) #18
+unique(Mgigas$Species) #1
 
-Map %>% 
-  group_by(Country) %>%
-  filter(OsHV1_var == "OsHV-1") %>% 
-  reframe(count = n()) #14 countries
 
-Map %>% 
+## OsHV-1
+Mgigas %>% 
   group_by(Country) %>%
-  filter(OsHV1_var != "OsHV-1") %>% 
+  filter(OsHV_var == "OsHV-1") %>% 
   reframe(count = n()) #13 countries
-
-#### Filter out M. gigas ====
-Map.gigas <- Map %>% 
-  filter(Species == "Magallana gigas")
-
-glimpse(Map.gigas)
-
-unique(Map.gigas$Paper) #32
-unique(Map.gigas$Country) #19
-unique(Map.gigas$Species) #1
+  
+## Not OsHV-1
+Mgigas %>% 
+  group_by(Country) %>%
+  filter(OsHV_var != "OsHV-1") %>% 
+  reframe(count = n()) #17 countries
 
 ## OsHV-1 type
-library(ggdark)
 
-Country.Plot <-  Map.gigas %>%
-  group_by(Country, OsHV1_var) %>% 
+Country.Plot <-  Mgigas %>%
+  group_by(Country, OsHV_var) %>% 
   reframe(count = n()) %>% 
-  ggplot(aes(x = Country, y = count, fill = OsHV1_var, group = OsHV1_var)) +
+  ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
   geom_bar(stat = "identity", position = position_dodge()) +
-  dark_theme_classic()
+  theme_classic()
 
 Country.Plot
 
@@ -88,36 +83,36 @@ unlink(TEMP_FILE)
 ######################################################
 
 
-######## Map of OsHV-1 Detections ==========================
+######## Mgigas of OsHV-1 Detections ==========================
 
 #### OsHV-1 coords ==============
 
-glimpse(Map.gigas)
+glimpse(Mgigas)
 
-OsHV1_coord <- Map.gigas %>% 
+OsHV1_coord <- Mgigas %>% 
   filter(!is.na(GPS_lat),
          !is.na(GPS_long))
 
 glimpse(OsHV1_coord)
 
 ### latitudes
-Map_nonVarlat <- OsHV1_coord$GPS_lat
-Map_nonVarlat
+Mgigas_nonVarlat <- OsHV1_coord$GPS_lat
+Mgigas_nonVarlat
 
 ### longitudes
-Map_nonVarlong <- OsHV1_coord$GPS_long
-Map_nonVarlong
+Mgigas_nonVarlong <- OsHV1_coord$GPS_long
+Mgigas_nonVarlong
 
 nonVarSites.df <- data.frame(
-  lon = Map_nonVarlong,
-  lat = Map_nonVarlat)
+  lon = Mgigas_nonVarlong,
+  lat = Mgigas_nonVarlat)
 
 
 
 glimpse(nonVarSites.df)
 
 #### OsHV-1 uvar data ==============
-OsHV1Var_coord <- Map.gigas %>% 
+OsHV1Var_coord <- Mgigas %>% 
   filter(OsHV1_var != "OsHV-1",
          !is.na(GPS_lat),
          !is.na(GPS_long))
@@ -126,21 +121,21 @@ OsHV1Var_coord$GPS_lat <- as.double(OsHV1Var_coord$GPS_lat)
 OsHV1Var_coord$GPS_lat
 
 ### latitudes
-Map_Varlat <- OsHV1Var_coord$GPS_lat
-Map_Varlat
+Mgigas_Varlat <- OsHV1Var_coord$GPS_lat
+Mgigas_Varlat
 
 ### longitudes
-Map_Varlong <- OsHV1Var_coord$GPS_long
-Map_Varlong
+Mgigas_Varlong <- OsHV1Var_coord$GPS_long
+Mgigas_Varlong
 
 VarSites.df <- data.frame(
-  lon = Map_Varlong,
-  lat = Map_Varlat)
+  lon = Mgigas_Varlong,
+  lat = Mgigas_Varlat)
 
 glimpse(VarSites.df)
 
-## get Maps API Key
-register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Maps API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
+## get Mgigass API Key
+register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigass API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
 
 #create a data.frame
 #sites.df <- data.frame(
@@ -156,27 +151,27 @@ register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #
 
 nonVarSites.df
 
-#load a googlemap 
-get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, scale = 2,  maptype = "hybrid") %>% ggmap()
+#load a googleMgigas 
+get_googleMgigas(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, scale = 2,  Mgigastype = "hybrid") %>% ggMgigas()
 
-## generate high quality maps using geom_point() to generate markers
+## generate high quality Mgigass using geom_point() to generate markers
 
-# satellite style map of California with Zoom
-Detection_Map <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
+# satellite style Mgigas of California with Zoom
+Detection_Mgigas <- get_Mgigas("Atlantic Ocean", zoom =  1, Mgigastype = "satellite")
 
-ggmap(Detection_Map) +
+ggMgigas(Detection_Mgigas) +
   geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5)
 #geom_text(data = sites.labels, aes(x = lon, y = lat, label = site.name), nudge_x = 0.05, nudge_y = 0.006, hjust = 1)
 
-# Tone-Lite Map
-qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
+# Tone-Lite Mgigas
+qMgigas("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", Mgigastype = "toner-lite") +
   geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5)
 #geom_text(data = sites.labels, aes(x = lon, y = lat, label = site.name), nudge_x = 0.015, nudge_y = 0.006, hjust = 1)
 
-# Watercolor Map
-qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
+# Watercolor Mgigas
+qMgigas("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", Mgigastype = "watercolor") + ## Tomales Bay - Artistic
   geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = 'purple', alpha = 0.7,  size = 5) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = 'red', alpha = 0.7,  size = 5)
 
