@@ -146,11 +146,9 @@ unlink(TEMP_FILE)
 
 ######## Map: Mgigas of OsHV-1 Detections ==========================
 
-unique(OsHV1$OsHV_var)
-# [1] "OsHV-1"                  "OsHV-1 μVar"            
-#[3] "Herpes-like virus"       "Herpesvirus"            
-#[5] "AVNV"                    "OsHV"                   
-#[7] "OsHV-1 non-μvar variant"
+unique(Mgigas$OsHV_var)
+# [1] "OsHV-1"                  "OsHV-1 μVar"             "Herpes-like virus"      
+# [4] "Herpesvirus"             "AVNV"                    "OsHV-1 non-μvar variant"
 
 #### OsHV-1 coords ==============
 
@@ -344,10 +342,10 @@ get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, sca
 Detection_Mgigas <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
 
 ggmap(Detection_Mgigas) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
+  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
   geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#984EA3', alpha = 0.7,  size = 6) +
   geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
 
 
@@ -355,16 +353,14 @@ ggmap(Detection_Mgigas) +
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
+  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
   geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#984EA3', alpha = 0.7,  size = 6) +
   geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
 
 # Watercolor Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
+  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
   geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#984EA3', alpha = 0.7,  size = 6) +
   geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)

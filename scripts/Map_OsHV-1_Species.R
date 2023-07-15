@@ -27,6 +27,7 @@ unique(Spp$Country) #15
 unique(Spp$Species) #37
 unique(Spp$Taxa) #13
 unique(Spp$Paper)
+unique(Spp$OsHV_var)
 
 
 #### Plot Count of Other taxa ====
@@ -77,11 +78,13 @@ unlink(TEMP_FILE)
 
 #### OsHV-1 Var Type Plot==============
 
+unique(Spp$OsHV_var)
+
 ## "Other Oyster" species
 Spp.OsHVonly <- Spp %>% 
-  filter(OsHV_var == "OsHV-1" | OsHV_var == "OsHV-1 μVar" | OsHV_var == "OsHV-1 non-μvar variant")
+  filter(OsHV_var == "OsHV-1" | OsHV_var == "OsHV-1 μVar" | OsHV_var == "OsHV")
 
-unique(Spp.OsHVonly$Country)
+unique(Spp.OsHVonly$OsHV_var)
 
 SppCountry.Plot <- Spp.OsHVonly %>%
   group_by(Country, OsHV_var) %>%
@@ -89,7 +92,7 @@ SppCountry.Plot <- Spp.OsHVonly %>%
   reframe(count = n()) %>% 
   ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
   geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_manual(values=c("#FDAE61", "#D53E4F")) +
+  scale_fill_manual(values=c("#ABD9E9", "#FDAE61", "#D53E4F")) +
   theme_classic()
 
 SppCountry.Plot
@@ -129,41 +132,104 @@ unlink(TEMP_FILE)
 
 ######################################################
 
+unique(Spp.nonOsHV$OsHV_var)
+
+Spp.nonOsHV <- Spp %>% 
+  filter(OsHV_var == "AVNV" | OsHV_var == "Herpes-like virus")
+
+Spp.nonOsHV.Plot <- Spp.nonOsHV %>%
+  group_by(Country, OsHV_var) %>%
+  reframe(count = n()) %>% 
+  ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_manual(values=c("#FF7F00", "#4DAF4A", "#984EA3")) +
+  theme_classic()
+
+Spp.nonOsHV.Plot
+
+#### ** PPT: non-OsHV-1 VarType Plot ==============
+
+#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
+library(officer)
+## initialize R object representing .pptx file. 
+Spp.nonOsHV.Plot_fig <- read_pptx()
+Spp.nonOsHV.Plot_fig <- add_slide(Spp.nonOsHV.Plot_fig , layout = "Title and Content", master = "Office Theme")
+Spp.nonOsHV.Plot_fig <-  ph_with(x = Spp.nonOsHV.Plot_fig, value = Spp.nonOsHV.Plot, location = ph_location_fullsize() )
+Spp.nonOsHV.Plot_fig  <- ph_with(x = Spp.nonOsHV.Plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(Spp.nonOsHV.Plot_fig, target = "presentations/plot.pptx")
+
+#### R2PPT / RDCOMClient =====
+
+#install.packages("devtools", dependencies = TRUE)
+
+library(RDCOMClient)
+library(R2PPT)
+
+## Step 1: Save as a temporary file
+TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
+ggsave(TEMP_FILE, plot = Spp.nonOsHV.Plot) # Saving the plot to the temporary file
+
+
+## Step 2: Open a blank PPT slide
+mkppt <- PPT.Init (method = "RDCOMClient")
+mkppt <- PPT.AddBlankSlide(mkppt)
+
+## Step 3: Export graph to PPT slide
+mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
+
+unlink(TEMP_FILE)
+
+######################################################
 
 ######## Map of OsHV-1 Reservoirs ==========================
 
-### latitudes
-Spp_lat <- Spp$GPS_lat
-Spp_lat
-
-### longitudes
-Spp_long <- Spp$GPS_long
-Spp_long
+unique(Spp$OsHV_var)
+# [1] "OsHV-1"            "OsHV-1 μVar"       "Herpes-like virus"     
+# [4] "AVNV"              "OsHV"
 
 #### OsHV-1 coords ==============
 
-OsHV1_coord <- Spp %>% 
-  filter(OsHV1_var == "OsHV-1")
+glimpse(Spp)
 
-OsHV1_coord
+OsHV1_coord <- Spp %>% 
+  filter(OsHV_var == "OsHV-1",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+glimpse(OsHV1_coord)
+
+OsHV1_coord$GPS_lat <- as.double(OsHV1_coord$GPS_lat)
+OsHV1_coord$GPS_lat
+
+OsHV1_coord$GPS_long <- as.double(OsHV1_coord$GPS_long)
+OsHV1_coord$GPS_long
 
 ### latitudes
-Spp_nonVarlat <- OsHV1_coord$GPS_lat
-Spp_nonVarlat
+Spp_OsHV1_lat <- OsHV1_coord$GPS_lat
+Spp_OsHV1_lat
 
 ### longitudes
-Spp_nonVarlong <- OsHV1_coord$GPS_long
-Spp_nonVarlong
+Spp_OsHV1long <- OsHV1_coord$GPS_long
+Spp_OsHV1long
 
-nonVarSites.df <- data.frame(
-  lon = Spp_nonVarlong,
-  lat = Spp_nonVarlat)
+OsHV1Sites.df <- data.frame(
+  lon = Spp_OsHV1long,
+  lat = Spp_OsHV1_lat)
 
-glimpse(nonVarSites.df)
+glimpse(OsHV1Sites.df)
 
-#### OsHV-1 uvar data ==============
+#### OsHV-1 μVar data ==============
 OsHV1Var_coord <- Spp %>% 
-  filter(OsHV1_var != "OsHV-1")
+  filter(OsHV_var == "OsHV-1 μVar",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+OsHV1Var_coord$GPS_lat <- as.double(OsHV1Var_coord$GPS_lat)
+OsHV1Var_coord$GPS_lat
+
+OsHV1Var_coord$GPS_long <- as.double(OsHV1Var_coord$GPS_long)
+OsHV1Var_coord$GPS_long
+
 
 ### latitudes
 Spp_Varlat <- OsHV1Var_coord$GPS_lat
@@ -179,9 +245,89 @@ VarSites.df <- data.frame(
 
 glimpse(VarSites.df)
 
+#### OsHV data ==============
+OsHV_coord <- Spp %>% 
+  filter(OsHV_var == "OsHV",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
 
-## get Maps API Key
-register_google(key = "AIzaSyAromYd5yoy--uNE9ANyPyWCS1PdGZwYGg", write = TRUE) #that is my "Maps API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
+OsHV_coord$GPS_lat <- as.double(OsHV_coord$GPS_lat)
+OsHV_coord$GPS_lat
+
+OsHV_coord$GPS_long <- as.double(OsHV_coord$GPS_long)
+OsHV_coord$GPS_long
+
+
+### latitudes
+Spp_OsHVlat <- OsHV_coord$GPS_lat
+Spp_OsHVlat
+
+### longitudes
+Spp_OsHVlong <- OsHV_coord$GPS_long
+Spp_OsHVlong
+
+OsHVsites.df <- data.frame(
+  lon = Spp_OsHVlong,
+  lat = Spp_OsHVlat)
+
+glimpse(OsHVsites.df)
+
+#### AVNV data ==============
+AVNV_coord <- Spp %>% 
+  filter(OsHV_var == "AVNV",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+AVNV_coord$GPS_lat <- as.double(AVNV_coord$GPS_lat)
+AVNV_coord$GPS_lat
+
+AVNV_coord$GPS_long <- as.double(AVNV_coord$GPS_long)
+AVNV_coord$GPS_long
+
+
+### latitudes
+Spp_ANVNlat <- AVNV_coord$GPS_lat
+Spp_ANVNlat
+
+### longitudes
+Spp_ANVNlong <- AVNV_coord$GPS_long
+Spp_ANVNlong
+
+AVNVSites.df <- data.frame(
+  lon = Spp_ANVNlong,
+  lat = Spp_ANVNlat)
+
+glimpse(AVNVSites.df)
+
+#### Herpes-like data ==============
+herpL_coord <- Spp %>% 
+  filter(OsHV_var == "Herpes-like virus",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+herpL_coord$GPS_lat <- as.double(herpL_coord$GPS_lat)
+herpL_coord$GPS_lat
+
+herpL_coord$GPS_long <- as.double(herpL_coord$GPS_long)
+herpL_coord$GPS_long
+
+
+### latitudes
+Spp_herpLlat <- herpL_coord$GPS_lat
+Spp_herpLlat
+
+### longitudes
+Spp_herpLlong <- herpL_coord$GPS_long
+Spp_herpLlong
+
+herpLSites.df <- data.frame(
+  lon = Spp_herpLlong,
+  lat = Spp_herpLlat)
+
+glimpse(herpLSites.df)
+
+## get Mgigass API Key
+register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigass API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
 
 #create a data.frame
 #sites.df <- data.frame(
@@ -190,57 +336,40 @@ register_google(key = "AIzaSyAromYd5yoy--uNE9ANyPyWCS1PdGZwYGg", write = TRUE) #
 # glimpse(sites.df)
 
 #sites.labels <- data.frame(
-  #lon = c(-122.947833, -122.927504, -122.865700),
-  #lat = c(38.218050, 38.205616, 38.120200),
-  #site.name = c("HI", "BB", "TB"))
+#lon = c(-122.947833, -122.927504, -122.865700),
+#lat = c(38.218050, 38.205616, 38.120200),
+#site.name = c("HI", "BB", "TB"))
 #glimpse(sites.labels)
 
-
-#load a googlemap 
+#load a googlemaps 
 get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, scale = 2,  maptype = "hybrid") %>% ggmap()
 
-## generate high quality maps using geom_point() to generate markers
 
-# satellite style map of California with Zoom
-Spp_Map <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
+## generate high quality ggmap() using geom_point() to generate markers
 
-ggmap(Spp_Map) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5)
-  #geom_text(data = sites.labels, aes(x = lon, y = lat, label = site.name), nudge_x = 0.05, nudge_y = 0.006, hjust = 1)
+# satellite style Mgigas of California with Zoom
+Detection_Mgigas <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
 
-# Tone-Lite Map
+ggmap(Detection_Mgigas) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
+  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+
+
+# Tone-Lite Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5)
-#geom_text(data = sites.labels, aes(x = lon, y = lat, label = site.name), nudge_x = 0.015, nudge_y = 0.006, hjust = 1)
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
+  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
 
-# Watercolor Map
+# Watercolor Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = 'purple', alpha = 0.7,  size = 5) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = 'red', alpha = 0.7,  size = 5)
-
-  #geom_text(data = sites.labels, aes(x = lon, y = lat, label = site.name), nudge_x = 0.015, nudge_y = 0.006, hjust = 1)
-
-
-###########
-
-
-#make inset maps for sites AND for landmarks
-sites_inset_map = ggdraw() +
-  draw_plot(TB_watercolor) +
-  draw_plot(CA_watercolor, x = 0.638, y = 0.628, width = 0.3, height = 0.4)
-
-sites_inset_map
-
-#run sites_inset_map before running ggsave
-ggsave("fig_output/WatercolorMap_sites.png", dpi = 320, bg='transparent') 
-
-landmarks_inset_map = ggdraw() +
-  draw_plot(SFBay_watercolor) +
-  draw_plot(CA_watercolor_BayArea, x = 0.655, y = 0.700, width = 0.3, height = 0.3)
-
-landmarks_inset_map
-
-#run landmarks_inset_map before running ggsave
-ggsave("fig_output/WatercolorMap_landmarks.png", dpi = 320, bg='transparent')
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
+  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)

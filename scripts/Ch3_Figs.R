@@ -1,8 +1,7 @@
 ###### Figures for Chapter 3
 
 library(tidyverse)
-
-
+library(gtsummary)
 
 
 ### load data
@@ -10,6 +9,61 @@ OsHV1 <- read_csv("data/OsHV1infections_14Jul2023.csv")
 glimpse(OsHV1)
 
 unique(OsHV1$Taxa)
+unique(OsHV1$Species)
+unique(OsHV1$Year_Sampled)
+
+#### Timeline of Infections ====
+
+Detections <- OsHV1 %>% 
+  select(Year_Sampled, Country, OsHV_var, Taxa) %>%
+  group_by(Year_Sampled, OsHV_var) %>% 
+  count(OsHV_var)
+
+Detections
+
+
+Detections.plot <- ggplot(aes(x = Year_Sampled, y = n, color = OsHV_var), data = Detections) +
+  geom_jitter(size = 3) +
+  scale_x_continuous(limits = c(1990, 2023), breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020, 2023)) +
+  scale_color_manual(values=c("#FF7F00", "#4DAF4A","#984EA3", "#ABc9F9", "#FDAE61","#ABD9E9", "#D53E4F")) +
+  theme_classic()
+
+Detections.plot
+
+#### ** PPT: OsHV-1 infections through time ==============
+
+#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
+library(officer)
+## initialize R object representing .pptx file. 
+Detections.plot_fig <- read_pptx()
+Detections.plot_fig <- add_slide(Detections.plot_fig , layout = "Title and Content", master = "Office Theme")
+Detections.plot_fig <-  ph_with(x = Detections.plot_fig, value = Detections.plot, location = ph_location_fullsize() )
+Detections.plot_fig  <- ph_with(x = Detections.plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(Detections.plot_fig, target = "presentations/plot.pptx")
+
+#### R2PPT / RDCOMClient =====
+
+#install.packages("devtools", dependencies = TRUE)
+
+library(RDCOMClient)
+library(R2PPT)
+
+## Step 1: Save as a temporary file
+TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
+ggsave(TEMP_FILE, plot = Detections.plot) # Saving the plot to the temporary file
+
+
+## Step 2: Open a blank PPT slide
+mkppt <- PPT.Init (method = "RDCOMClient")
+mkppt <- PPT.AddBlankSlide(mkppt)
+
+## Step 3: Export graph to PPT slide
+mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
+
+unlink(TEMP_FILE)
+
+######################################################
+
 
 #### Number of studies per group ====
 
@@ -53,8 +107,31 @@ Spp %>%
 
 #### Tables of studies ====
 
+#### ALL ====
+OsHV1 %>% 
+  select(Species, OsHV_var, Paper, Year_Sampled) %>% 
+  group_by(Paper) %>% 
+  arrange(Year_Sampled) %>% 
+  distinct() %>% 
+  gt()
+
 #### M. gigas ====
-Mgigas <- OsHV1 %>% 
-  filter(Taxa == "Pacific Oyster")
+Mgigas %>% 
+  select(OsHV_var, Paper) %>% 
+  arrange(Species) %>% 
+  distinct() %>% 
+  tbl_summary()
+  
 
 #### Other spp. ====
+
+Spp %>% 
+  select(Species, OsHV_var, Paper) %>% 
+  group_by(Species) %>% 
+  arrange(OsHV_var) %>% 
+  distinct() %>% 
+  gt()
+
+##### XXX =========
+
+
