@@ -5,7 +5,7 @@ library(gtsummary)
 
 
 ### load data
-OsHV1 <- read_csv("data/OsHV1infections_14Jul2023.csv")
+OsHV1 <- read_csv("data/OsHV1infections_19Jul2023.csv")
 glimpse(OsHV1)
 
 unique(OsHV1$Taxa)
@@ -108,12 +108,16 @@ Spp %>%
 #### Tables of studies ====
 
 #### ALL ====
-OsHV1 %>% 
-  select(Species, OsHV_var, Paper, Year_Sampled) %>% 
+Prev.csv <- OsHV1 %>% 
+  select(Study_numb, URL, Paper, Title, Year_Sampled, Species, OsHV_var) %>% 
   group_by(Paper) %>% 
-  arrange(Year_Sampled) %>% 
-  distinct() %>% 
-  gt()
+  arrange(Study_numb) %>% 
+  distinct() #%>% 
+  #gt()
+
+Prev.csv
+
+write_csv(Prev.csv, "data/QuantifyingOsHV.csv")
 
 #### M. gigas ====
 Mgigas %>% 

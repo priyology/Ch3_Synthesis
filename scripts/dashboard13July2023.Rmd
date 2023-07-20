@@ -124,3 +124,13 @@ div(style = 'height:600px; overflow-y:scroll', gt(df1) %>%
                   data_row.padding = px(3))
     )
 ```
+
+
+rsconnect::setAccountInfo(name='priyology',
+                          token='22C86ED2D9BEE6FB33C5467A1B0A8D2F',
+                          secret='pN+NtXok90+aG8btyrrm44XuexvO7cqwaUm7jfX7')
+
+
+rsconnect::deployApp('path/to/your/app')
+    
+    
