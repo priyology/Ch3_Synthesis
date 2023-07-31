@@ -13,7 +13,7 @@ library(ggsn) ##scale bar: http://oswaldosantos.github.io/ggsn/ ;
 ## ggmap intro: https://appsilon.com/r-ggmap/
 
 #### load data ==============
-OsHV1 <- read_csv("data/OsHV1infections_14Jul2023.csv")
+OsHV1 <- read_csv("data/OsHV1infections_30Jul2023.csv")
 glimpse(OsHV1)
 
 #### Other spp. ====

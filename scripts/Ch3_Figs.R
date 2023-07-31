@@ -5,15 +5,22 @@ library(gtsummary)
 
 
 ### load data
-OsHV1 <- read_csv("data/OsHV1infections_19Jul2023.csv")
+OsHV1 <- read_csv("data/OsHV1infections_30Jul2023.csv")
 glimpse(OsHV1)
 
+unique(OsHV1$Study_numb)
+unique(OsHV1$Paper)
+unique(OsHV1$Year_Published)
+unique(OsHV1$Title)
+unique(OsHV1$Country)
+unique(OsHV1$GPS_lat)
+unique(OsHV1$GPS_long)
 unique(OsHV1$Taxa)
 unique(OsHV1$Species)
 unique(OsHV1$Year_Sampled)
+unique(OsHV1$OsHV_var)
 
-#### Timeline of Infections ====
-
+       
 Detections <- OsHV1 %>% 
   select(Year_Sampled, Country, OsHV_var, Taxa) %>%
   group_by(Year_Sampled, OsHV_var) %>% 
@@ -23,9 +30,9 @@ Detections
 
 
 Detections.plot <- ggplot(aes(x = Year_Sampled, y = n, color = OsHV_var), data = Detections) +
-  geom_jitter(size = 3) +
+  geom_jitter(size = 7) +
   scale_x_continuous(limits = c(1990, 2023), breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020, 2023)) +
-  scale_color_manual(values=c("#FF7F00", "#4DAF4A","#984EA3", "#ABc9F9", "#FDAE61","#ABD9E9", "#D53E4F")) +
+  scale_color_manual(values=c("#FF7F00", "#4DAF4A", "#FDAE61", "#4DA8F9", "#984EA3","#ABD9E9", "#D53E4F")) +
   theme_classic()
 
 Detections.plot

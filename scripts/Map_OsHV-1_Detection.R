@@ -13,7 +13,7 @@ library(cowplot)
 ## ggMgigas intro: https://appsilon.com/r-ggMgigas/
 
 #### load data ==============
-OsHV1 <- read_csv("data/OsHV1infections_14Jul2023.csv")
+OsHV1 <- read_csv("data/OsHV1infections_30Jul2023.csv")
 glimpse(OsHV1)
 
 unique(OsHV1$OsHV_var)
