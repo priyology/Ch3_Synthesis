@@ -92,7 +92,7 @@ DetectionsA <- OsHV1 %>%
 View(DetectionsA)
 
 DetectionsA.plot <- ggplot(aes(x = Year_Sampled, y = freq, color = OsHV_var), data = DetectionsA) +
-  geom_point(position = "jitter", size = 5, alpha = 0.7) +
+  geom_point(position = "jitter", size = 4) +
   scale_x_continuous(limits = c(1990, 2023), breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020, 2023)) +
   scale_color_manual(values=c("#4DA8F9", "#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58","#FF7F00", "#D53E4F")) +
   theme_classic()
@@ -367,7 +367,7 @@ Prev_Country.plot <- ggplot(aes(x = Country, y = mean_prev, group = OsHV_var, fi
   geom_bar(stat = "identity") +
   geom_errorbar(aes(ymin = mean_prev-SE_prev, ymax = mean_prev + SE_prev), width=.1, position=position_dodge(.9)) +
   scale_fill_manual(values=c("#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58", "#D53E4F")) +
-  theme_classic()+
+  theme_classic() +
   theme(axis.text.x = element_text(angle=90, hjust=1))
 
 Prev_Country.plot
