@@ -24,10 +24,16 @@ unique(OsHV1$OsHV_var)
 
 Mgigas <- OsHV1 %>% 
   filter(Taxa == "Pacific Oyster",
-         Country != "NA")
+         Country != "NA") %>%
+  select(Country, OsHV_var) %>% 
+  group_by(Country, OsHV_var) %>% 
+  reframe(n=n()) %>% 
+  mutate(freq = n / sum(n))
+
+Mgigas
 
 ## unique species
-unique(Mgigas$Paper) #79
+unique(Mgigas$Paper) #75
 unique(Mgigas$Country) #18
 unique(Mgigas$Species) #1
 
@@ -36,26 +42,34 @@ unique(Mgigas$Species) #1
 Mgigas %>% 
   group_by(Country) %>%
   filter(OsHV_var == "OsHV-1") %>% 
-  reframe(count = n()) #13 countries
+  reframe(count = n()) #14 countries
   
 ## Not OsHV-1
 Mgigas %>% 
   group_by(Country) %>%
-  reframe(count = n()) #17 countries
+  reframe(count = n()) #18 countries
 
 ## OsHV-1 type
 
-Mgigas.OsHVonly <- Mgigas %>% 
-  filter(OsHV_var == "OsHV-1" | OsHV_var == "OsHV-1 μVar" | OsHV_var == "OsHV-1 non-μvar variant")
+Mgigas <- OsHV1 %>% 
+  filter(Taxa == "Pacific Oyster",
+         Country != "NA") %>%
+  select(Country, OsHV_var) %>% 
+  group_by(Country, OsHV_var) %>% 
+  reframe(n=n()) %>% 
+  mutate(freq = n / sum(n))
 
-Country.Plot <- Mgigas.OsHVonly %>%
+Mgigas
+
+Country.Plot <- Mgigas %>%
   group_by(Country, OsHV_var) %>%
   #filter(OsHV_var != "Herpesvirus" | OsHV_var != "Herpes-like virus" | OsHV_var != "AVNV") %>%   
-  reframe(count = n()) %>% 
-  ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_manual(values=c("#FDAE61", "#ABD9E9", "#D53E4F")) +
-  theme_classic()
+  #reframe(count = n()) %>% 
+  ggplot(aes(x = Country, y = freq, fill = OsHV_var, group = OsHV_var)) +
+  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = "single")) +
+  scale_fill_manual(values=c("#4DA8F9", "#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58","#FF7F00", "#D53E4F")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle=90, hjust=1))
 
 Country.Plot
 

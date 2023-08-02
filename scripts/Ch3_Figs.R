@@ -262,6 +262,19 @@ glimpse(OsHV1)
 
 
 ## Freq Data
+
+Freq_Study <- OsHV1 %>%
+  filter(Prevalence != "NA") %>% 
+  select(Study_numb, Prevalence) %>%
+  group_by(Study_numb) %>% 
+  reframe(n=n()) %>% 
+  mutate(freq = n / sum(n))
+
+View(Freq_Study)
+
+### Proportion of studies without Prev Data
+(116-64)/116 #0.44827
+
 Freq_Spp <- OsHV1 %>%
   filter(Prevalence != "NA") %>% 
   select(Species, Prevalence) %>%
@@ -387,6 +400,19 @@ Prev_SppVar.plot
 glimpse(OsHV1)
 
 ## Freq Data
+
+FreqI_Study <- OsHV1 %>%
+  filter(Intensity != "NA") %>% 
+  select(Study_numb, Intensity) %>%
+  group_by(Study_numb) %>% 
+  reframe(n=n()) %>% 
+  mutate(freq = n / sum(n))
+
+View(FreqI_Study)
+
+### Proportion of studies without Intensity Data
+(116-42)/116 #0.637931
+
 FreqI_Spp <- OsHV1 %>%
   filter(Intensity != "NA") %>% 
   select(Species, Prevalence) %>%
