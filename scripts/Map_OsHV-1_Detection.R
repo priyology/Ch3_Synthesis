@@ -22,7 +22,8 @@ unique(OsHV1$OsHV_var)
 #[5] "AVNV"                    "OsHV"                   
 #[7] "OsHV-1 non-μvar variant"
 
-Mgigas <- OsHV1 %>% 
+## Frequency data
+MgigasFreq <- OsHV1 %>% 
   filter(Taxa == "Pacific Oyster",
          Country != "NA") %>%
   select(Country, OsHV_var) %>% 
@@ -30,43 +31,14 @@ Mgigas <- OsHV1 %>%
   reframe(n=n()) %>% 
   mutate(freq = n / sum(n))
 
-Mgigas
-
-## unique species
-unique(Mgigas$Paper) #75
-unique(Mgigas$Country) #18
-unique(Mgigas$Species) #1
-
-
-## OsHV-1
-Mgigas %>% 
-  group_by(Country) %>%
-  filter(OsHV_var == "OsHV-1") %>% 
-  reframe(count = n()) #14 countries
-  
-## Not OsHV-1
-Mgigas %>% 
-  group_by(Country) %>%
-  reframe(count = n()) #18 countries
-
-## OsHV-1 type
-
-Mgigas <- OsHV1 %>% 
-  filter(Taxa == "Pacific Oyster",
-         Country != "NA") %>%
-  select(Country, OsHV_var) %>% 
-  group_by(Country, OsHV_var) %>% 
-  reframe(n=n()) %>% 
-  mutate(freq = n / sum(n))
-
-Mgigas
+MgigasFreq
 
 Country.Plot <- Mgigas %>%
   group_by(Country, OsHV_var) %>%
   #filter(OsHV_var != "Herpesvirus" | OsHV_var != "Herpes-like virus" | OsHV_var != "AVNV") %>%   
   #reframe(count = n()) %>% 
   ggplot(aes(x = Country, y = freq, fill = OsHV_var, group = OsHV_var)) +
-  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = "single")) +
+  geom_col(position=position_dodge2(preserve = "single")) +
   scale_fill_manual(values=c("#4DA8F9", "#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58","#FF7F00", "#D53E4F")) +
   theme_classic() +
   theme(axis.text.x = element_text(angle=90, hjust=1))
@@ -107,58 +79,33 @@ unlink(TEMP_FILE)
 
 ######################################################
 
-
-Mgigas.nonOsHV <- Mgigas %>% 
-  filter(OsHV_var == "AVNV" | OsHV_var == "Herpesvirus" | OsHV_var == "Herpes-like virus")
-
-unique(Mgigas.nonOsHV$OsHV_var)
-
-NonOsHV.Plot <- Mgigas.nonOsHV %>%
-  group_by(Country, OsHV_var) %>%
-  #filter(OsHV_var != "Herpesvirus" | OsHV_var != "Herpes-like virus" | OsHV_var != "AVNV") %>%   
-  reframe(count = n()) %>% 
-  ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_manual(values=c("#FF7F00", "#4DAF4A", "#984EA3")) +
-  theme_classic()
-
-NonOsHV.Plot
-
-#### ** PPT: non-OsHV-1 VarType Plot ==============
-
-#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
-library(officer)
-## initialize R object representing .pptx file. 
-NonOsHV.Plot_fig <- read_pptx()
-NonOsHV.Plot_fig <- add_slide(NonOsHV.Plot_fig , layout = "Title and Content", master = "Office Theme")
-NonOsHV.Plot_fig <-  ph_with(x = NonOsHV.Plot_fig, value = NonOsHV.Plot, location = ph_location_fullsize() )
-NonOsHV.Plot_fig  <- ph_with(x = NonOsHV.Plot_fig, "Plot", location = ph_location_type(type = "title") )
-print(NonOsHV.Plot_fig, target = "presentations/plot.pptx")
-
-#### R2PPT / RDCOMClient =====
-
-#install.packages("devtools", dependencies = TRUE)
-
-library(RDCOMClient)
-library(R2PPT)
-
-## Step 1: Save as a temporary file
-TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
-ggsave(TEMP_FILE, plot = NonOsHV.Plot) # Saving the plot to the temporary file
-
-
-## Step 2: Open a blank PPT slide
-mkppt <- PPT.Init (method = "RDCOMClient")
-mkppt <- PPT.AddBlankSlide(mkppt)
-
-## Step 3: Export graph to PPT slide
-mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
-
-unlink(TEMP_FILE)
-
-######################################################
-
 ######## Map: Mgigas of OsHV-1 Detections ==========================
+
+# M. gigas detections only
+Mgigas <- OsHV1 %>% 
+  filter(Taxa == "Pacific Oyster")
+
+Mgigas
+
+## unique species
+unique(Mgigas$Paper) #75
+unique(Mgigas$Country) #18 + NA
+unique(Mgigas$Species) #1
+
+
+## OsHV-1
+Mgigas %>% 
+  group_by(Country) %>%
+  filter(OsHV_var == "OsHV-1") %>% 
+  reframe(count = n()) #14 countries
+  
+## Not OsHV-1
+Mgigas %>% 
+  group_by(Country) %>%
+  reframe(count = n()) #18 countries
+
+## OsHV-1 type
+
 
 unique(Mgigas$OsHV_var)
 # [1] "OsHV-1"                  "OsHV-1 μVar"             "Herpes-like virus"      
@@ -331,9 +278,9 @@ herpLSites.df <- data.frame(
 
 glimpse(herpLSites.df)
 
-#### Herpesvirus data ==============
+#### OsHV data ==============
 herpz_coord <- Mgigas %>% 
-  filter(OsHV_var == "Herpes-like virus",
+  filter(OsHV_var == "OsHV",
          !is.na(GPS_lat),
          !is.na(GPS_long))
 
@@ -359,7 +306,7 @@ herpzSites.df <- data.frame(
 glimpse(herpzSites.df)
 
 ## get Mgigass API Key
-register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigass API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
+register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigas API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
 
 #create a data.fame
 #sites.df <- data.frame(
@@ -383,28 +330,33 @@ get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, sca
 Detection_Mgigas <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
 
 ggmap(Detection_Mgigas) +
-  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6)
-
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 4) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 4) +
+  geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
+  
 
 # Tone-Lite Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
-  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6)
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 4) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 4) +
+  geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
+
 
 # Watercolor Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
-  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6)
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 5) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 5) +
+  geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 5) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 5) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 5)
+  

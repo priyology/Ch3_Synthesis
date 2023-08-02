@@ -18,13 +18,13 @@ glimpse(OsHV1)
 
 #### Other spp. ====
 Spp <- OsHV1 %>% 
-  filter(Taxa != "Pacific Oyster",
+  filter(Species != "Magallana gigas",
          Country != "NA")
 
 ## unique species
-unique(Spp$Paper) #50
+unique(Spp$Paper) #51
 unique(Spp$Country) #15
-unique(Spp$Species) #37
+unique(Spp$Species) #42
 unique(Spp$Taxa) #13
 unique(Spp$Paper)
 unique(Spp$OsHV_var)
@@ -33,12 +33,19 @@ unique(Spp$OsHV_var)
 #### Plot Count of Other taxa ====
 library(ggdark)
 
-Reservoirs.Plot <-  Spp %>% 
-  group_by(Taxa) %>% 
-  summarize(count = n()) %>% 
-  ggplot(aes(x = Taxa, y = count, fill = Taxa)) +
-  geom_bar(stat = "identity") +
-  theme_classic()
+Reservoirs.Data <-  Spp %>% 
+  select(OsHV_var, Country) %>%
+  group_by(OsHV_var, Country) %>%
+  reframe(n=n()) %>%
+  mutate(freq = n / sum(n))
+
+Reservoirs.Data
+
+Reservoirs.Plot <- ggplot(aes(x = Country, y = freq, group = OsHV_var, fill = OsHV_var), data = Reservoirs.Data) +
+  geom_col(position=position_dodge2(preserve = "single")) +
+  scale_fill_manual(values=c("#4DA8F9", "#4DAF4A","#a700a7", "#FFDB58", "#D53E4F")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle=90, hjust=1))
 
 Reservoirs.Plot
 
@@ -76,38 +83,37 @@ unlink(TEMP_FILE)
 
 ######################################################
 
-#### OsHV-1 Var Type Plot==============
+#### OsHV-1 Var by Species Plot==============
 
 unique(Spp$OsHV_var)
 
-## "Other Oyster" species
-Spp.OsHVonly <- Spp %>% 
-  filter(OsHV_var == "OsHV-1" | OsHV_var == "OsHV-1 μVar" | OsHV_var == "OsHV")
+## Other species
+Reservoirs.Spp <-  Spp %>% 
+  select(OsHV_var, Species) %>%
+  group_by(OsHV_var, Species) %>%
+  reframe(n=n()) %>%
+  mutate(freq = n / sum(n))
 
-unique(Spp.OsHVonly$OsHV_var)
+Reservoirs.Spp
 
-SppCountry.Plot <- Spp.OsHVonly %>%
-  group_by(Country, OsHV_var) %>%
-  #filter(OsHV_var != "Herpesvirus" | OsHV_var != "Herpes-like virus" | OsHV_var != "AVNV") %>%   
-  reframe(count = n()) %>% 
-  ggplot(aes(x = Country, y = count, fill = OsHV_var, group = OsHV_var)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_manual(values=c("#ABD9E9", "#FDAE61", "#D53E4F")) +
-  theme_classic()
+Reservoirs.Spp.Plot <- ggplot(aes(x = Species, y = freq, group = OsHV_var, fill = OsHV_var), data = Reservoirs.Spp) +
+  geom_col(position=position_dodge2(preserve = "single")) +
+  scale_fill_manual(values=c("#4DA8F9", "#4DAF4A","#a700a7", "#FFDB58", "#D53E4F")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle=90, hjust=1))
 
-SppCountry.Plot
-
+Reservoirs.Spp.Plot
 
 #### ** PPT: OsHV-1 VarType Plot ==============
 
 #### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
 library(officer)
 ## initialize R object representing .pptx file. 
-SppCountry.Plot_fig <- read_pptx()
-SppCountry.Plot_fig <- add_slide(SppCountry.Plot_fig , layout = "Title and Content", master = "Office Theme")
-SppCountry.Plot_fig <-  ph_with(x = SppCountry.Plot_fig, value = SppCountry.Plot, location = ph_location_fullsize() )
-SppCountry.Plot_fig  <- ph_with(x = SppCountry.Plot_fig, "Plot", location = ph_location_type(type = "title") )
-print(SppCountry.Plot_fig, target = "presentations/plot.pptx")
+Reservoirs.Spp.Plot_fig <- read_pptx()
+Reservoirs.Spp.Plot_fig <- add_slide(Reservoirs.Spp.Plot_fig , layout = "Title and Content", master = "Office Theme")
+Reservoirs.Spp.Plot_fig <-  ph_with(x = Reservoirs.Spp.Plot_fig, value = Reservoirs.Spp.Plot, location = ph_location_fullsize() )
+Reservoirs.Spp.Plot_fig  <- ph_with(x = Reservoirs.Spp.Plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(Reservoirs.Spp.Plot_fig, target = "presentations/plot.pptx")
 
 #### R2PPT / RDCOMClient =====
 
@@ -118,7 +124,7 @@ library(R2PPT)
 
 ## Step 1: Save as a temporary file
 TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
-ggsave(TEMP_FILE, plot = SppCountry.Plot) # Saving the plot to the temporary file
+ggsave(TEMP_FILE, plot = Reservoirs.Spp.Plot) # Saving the plot to the temporary file
 
 
 ## Step 2: Open a blank PPT slide
@@ -342,7 +348,7 @@ register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #
 #glimpse(sites.labels)
 
 #load a googlemaps 
-get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, scale = 2,  maptype = "hybrid") %>% ggmap()
+get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = VarSites.df, scale = 2,  maptype = "hybrid") %>% ggmap()
 
 
 ## generate high quality ggmap() using geom_point() to generate markers
@@ -351,25 +357,25 @@ get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, sca
 Detection_Mgigas <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
 
 ggmap(Detection_Mgigas) +
-  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#4DA8F9', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4)
 
 
 # Tone-Lite Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
-  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#4DA8F9', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4)
 
 # Watercolor Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
-  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
-  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5) +
+  geom_point(data = OsHVsites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 5) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#4DA8F9', alpha = 0.7,  size = 5) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 5)

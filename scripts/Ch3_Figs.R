@@ -350,6 +350,19 @@ Prev_SppCountry <- OsHV1 %>%
 
 View(Prev_SppCountry)
 
+Prev_SppCountry.plot <- ggplot(aes(x = Country, y = mean_prev, group = OsHV_var, fill = OsHV_var), data = Prev_SppCountry) +
+  facet_wrap(Species~.) +
+  geom_col(position=position_dodge2(preserve = "single")) +
+  geom_errorbar(aes(ymin = mean_prev-SE_prev, ymax = mean_prev + SE_prev), width=.1, position=position_dodge(.9)) +
+  scale_fill_manual(values=c("#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58", "#D53E4F")) +
+  theme_classic()+
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  coord_flip()
+
+Prev_SppCountry.plot
+
+
+
 Prev_Country <- OsHV1 %>%
   filter(Prevalence != "NA",
          Country != "NA") %>% 
@@ -364,13 +377,48 @@ View(Prev_Country)
 
 Prev_Country.plot <- ggplot(aes(x = Country, y = mean_prev, group = OsHV_var, fill = OsHV_var), data = Prev_Country) +
   facet_wrap(OsHV_var~.) +
-  geom_bar(stat = "identity") +
+  geom_col(position=position_dodge2(preserve = "single")) +
   geom_errorbar(aes(ymin = mean_prev-SE_prev, ymax = mean_prev + SE_prev), width=.1, position=position_dodge(.9)) +
   scale_fill_manual(values=c("#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58", "#D53E4F")) +
   theme_classic() +
-  theme(axis.text.x = element_text(angle=90, hjust=1))
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  coord_flip()
 
 Prev_Country.plot
+
+#### ** PPT: Prevalence - Countries ==============
+
+#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
+library(officer)
+## initialize R object representing .pptx file. 
+Prev_Country.plot_fig <- read_pptx()
+Prev_Country.plot_fig <- add_slide(Prev_Country.plot_fig , layout = "Title and Content", master = "Office Theme")
+Prev_Country.plot_fig <-  ph_with(x = Prev_Country.plot_fig, value = Prev_Country.plot, location = ph_location_fullsize() )
+Prev_Country.plot_fig  <- ph_with(x = Prev_Country.plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(Prev_Country.plot_fig, target = "presentations/plot.pptx")
+
+#### R2PPT / RDCOMClient =====
+
+#install.packages("devtools", dependencies = TRUE)
+
+library(RDCOMClient)
+library(R2PPT)
+
+## Step 1: Save as a temporary file
+TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
+ggsave(TEMP_FILE, plot = Prev_Country.plot) # Saving the plot to the temporary file
+
+
+## Step 2: Open a blank PPT slide
+mkppt <- PPT.Init (method = "RDCOMClient")
+mkppt <- PPT.AddBlankSlide(mkppt)
+
+## Step 3: Export graph to PPT slide
+mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
+
+unlink(TEMP_FILE)
+
+######################################################
 
 Prev_SppVar <- OsHV1 %>%
   filter(Prevalence != "NA",
@@ -386,11 +434,12 @@ View(Prev_SppVar)
 
 Prev_SppVar.plot <- ggplot(aes(x = Species, y = mean_prev, group = OsHV_var, fill = OsHV_var), data = Prev_SppVar) +
   facet_wrap(OsHV_var~.) +
-  geom_bar(stat = "identity") +
+  geom_col(position=position_dodge2(preserve = "single")) +
   geom_errorbar(aes(ymin = mean_prev-SE_prev, ymax = mean_prev + SE_prev), width=.1, position=position_dodge(.9)) +
   scale_fill_manual(values=c("#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58", "#D53E4F")) +
   theme_classic()+
-  theme(axis.text.x = element_text(angle=90, hjust=1))
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  coord_flip()
 
 Prev_SppVar.plot
 
@@ -466,11 +515,12 @@ View(Int_SppVar)
 
 Int_SppVar.plot <- ggplot(aes(x = Species, y = mean_Int, group = OsHV_var, fill = OsHV_var), data = Int_SppVar) +
   facet_wrap(OsHV_var~.) +
-  geom_bar(stat = "identity") +
+  geom_col(position=position_dodge2(preserve = "single"))+
   geom_errorbar(aes(ymin = mean_Int-SE_Int, ymax = mean_Int + SE_Int), width=.1, position=position_dodge(.9)) +
   scale_fill_manual(values=c("#FFDB58", "#D53E4F")) +
   theme_classic()+
-  theme(axis.text.x = element_text(angle=90, hjust=1))
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  coord_flip()
 
 Int_SppVar.plot
 
@@ -500,13 +550,48 @@ View(Int_Country)
 
 Int_Country.plot <- ggplot(aes(x = Country, y = mean_Int, group = OsHV_var, fill = OsHV_var), data = Int_Country) +
   facet_wrap(OsHV_var~.) +
-  geom_bar(stat = "identity") +
+  geom_col(position=position_dodge2(preserve = "single")) +
   geom_errorbar(aes(ymin = mean_Int-SE_Int, ymax = mean_Int + SE_Int), width=.1, position=position_dodge(.9)) +
   scale_fill_manual(values=c("#FFDB58", "#D53E4F")) +
   theme_classic()+
   theme(axis.text.x = element_text(angle=90, hjust=1))
 
 Int_Country.plot
+
+#### ** PPT: Intensity - Countries ==============
+
+#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
+library(officer)
+## initialize R object representing .pptx file. 
+Int_Country.plot_fig <- read_pptx()
+Int_Country.plot_fig <- add_slide(Int_Country.plot_fig , layout = "Title and Content", master = "Office Theme")
+Int_Country.plot_fig <-  ph_with(x = Int_Country.plot_fig, value = Int_Country.plot, location = ph_location_fullsize() )
+Int_Country.plot_fig  <- ph_with(x = Int_Country.plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(Int_Country.plot_fig, target = "presentations/plot.pptx")
+
+#### R2PPT / RDCOMClient =====
+
+#install.packages("devtools", dependencies = TRUE)
+
+library(RDCOMClient)
+library(R2PPT)
+
+## Step 1: Save as a temporary file
+TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
+ggsave(TEMP_FILE, plot = Int_Country.plot) # Saving the plot to the temporary file
+
+
+## Step 2: Open a blank PPT slide
+mkppt <- PPT.Init (method = "RDCOMClient")
+mkppt <- PPT.AddBlankSlide(mkppt)
+
+## Step 3: Export graph to PPT slide
+mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
+
+unlink(TEMP_FILE)
+
+######################################################
+
 
 Int_SppCountry <- OsHV1 %>%
   filter(Intensity != "NA") %>% 
@@ -518,6 +603,17 @@ Int_SppCountry <- OsHV1 %>%
   arrange(mean_Int)
 
 View(Int_SppCountry)
+
+Int_SppCountry.plot <- ggplot(aes(x = Country, y = mean_Int, group = OsHV_var, fill = OsHV_var), data = Int_SppCountry) +
+  facet_grid(OsHV_var~Species) +
+  geom_col(position=position_dodge2(preserve = "single")) +
+  geom_errorbar(aes(ymin = mean_Int-SE_Int, ymax = mean_Int + SE_Int), width=.1, position=position_dodge(.9)) +
+  scale_fill_manual(values=c("#FFDB58", "#D53E4F", "#a700a7")) +
+  theme_classic()+
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+
+Int_SppCountry.plot
+
 
 
 #### Appendix of all papers ====
