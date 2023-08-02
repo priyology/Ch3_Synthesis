@@ -317,10 +317,37 @@ herpLSites.df <- data.frame(
 
 glimpse(herpLSites.df)
 
+#### Herpesvirus data ==============
+herpz_coord <- Mgigas %>% 
+  filter(OsHV_var == "Herpes-like virus",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+herpz_coord$GPS_lat <- as.double(herpz_coord$GPS_lat)
+herpz_coord$GPS_lat
+
+herpz_coord$GPS_long <- as.double(herpz_coord$GPS_long)
+herpz_coord$GPS_long
+
+
+### latitudes
+Mgigas_herpzlat <- herpz_coord$GPS_lat
+Mgigas_herpzlat
+
+### longitudes
+Mgigas_herpzlong <- herpz_coord$GPS_long
+Mgigas_herpzlong
+
+herpzSites.df <- data.frame(
+  lon = Mgigas_herpzlong,
+  lat = Mgigas_herpzlat)
+
+glimpse(herpzSites.df)
+
 ## get Mgigass API Key
 register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigass API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
 
-#create a data.frame
+#create a data.fame
 #sites.df <- data.frame(
 #  lon = Spp_long,
 #  lat = Spp_lat)
@@ -344,23 +371,26 @@ Detection_Mgigas <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
 ggmap(Detection_Mgigas) +
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 6) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 6) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6)
 
 
 # Tone-Lite Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 6) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 6) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6)
 
 # Watercolor Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 6) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 6) +
-  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#ABD9E9', alpha = 0.7,  size = 6) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6)
+  geom_point(data = OsHVSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 6) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 6) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 6) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 6)
