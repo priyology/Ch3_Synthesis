@@ -60,6 +60,99 @@ Spp %>%
   count(Search_Strategy, Paper) %>% 
   nrow() #30
 
+
+#### Timeline of variants & location ====
+
+positions <- c(0.5, -0.5, 1.0, -1.0, 1.5, -1.5)
+directions <- c(1, -1)
+text_offset <- (0.05)
+
+Timeline.Data <- OsHV1 %>% 
+  filter(Country != "NA",
+         Year_Sampled != "NA") %>% 
+  select(Country, OsHV_var, Year_Sampled) %>%
+  arrange(Year_Sampled) %>% 
+  group_by(Country, OsHV_var) %>% 
+  reframe(minYear = min(Year_Sampled)) %>%
+  mutate(position = rep(positions, length.out = 41),
+         direction = rep(directions, length.out = 41),
+         text_position = (1 * text_offset * direction) + (position)) #%>% 
+
+View(Timeline.Data)
+
+### EDITED THIS CSV
+#write_csv(Timeline.Data, "data/TimelineData.csv")
+###
+
+TimelinePlotData <- read_csv("data/TimelineData.csv")
+
+timeline_plot<-ggplot(TimelinePlotData, aes(x=minYear,y=0, col=OsHV_var, label=Country)) +
+  scale_color_manual(values=c("#4DA8F9", "#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58","#FF7F00", "#D53E4F")) +
+  theme_classic() +
+  geom_hline(yintercept=0, color = "black", linewidth=0.3) +
+  geom_segment(data = TimelinePlotData, aes(y = position, yend = 0, xend = minYear), color='black', size=0.2) +
+  geom_point(aes(y = 0), size = 4, color = 'black') +
+    theme(axis.line.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x =element_blank(),
+        axis.ticks.x =element_blank(),
+        axis.line.x =element_blank(),
+        legend.position = "bottom") +
+  geom_text(data = TimelinePlotData, aes(x = minYear,y = -0.1, label = minYear), size = 3.5, vjust = 0.5, color = 'black', fontface = "bold")+ #, angle = 90) +
+  geom_text(aes(y = text_position, label = Country), size = 3, fontface = "bold")
+  
+timeline_plot
+
+#### ** PPT: OsHV-1 Timeline ==============
+
+#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
+library(officer)
+## initialize R object representing .pptx file. 
+timeline_plot_fig <- read_pptx()
+timeline_plot_fig <- add_slide(timeline_plot_fig , layout = "Title and Content", master = "Office Theme")
+timeline_plot_fig <-  ph_with(x = timeline_plot_fig, value = timeline_plot, location = ph_location_fullsize() )
+timeline_plot_fig  <- ph_with(x = timeline_plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(timeline_plot_fig, target = "presentations/plot.pptx")
+
+#### R2PPT / RDCOMClient =====
+
+#install.packages("devtools", dependencies = TRUE)
+
+library(RDCOMClient)
+library(R2PPT)
+
+## Step 1: Save as a temporary file
+TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
+ggsave(TEMP_FILE, plot = timeline_plot) # Saving the plot to the temporary file
+
+
+## Step 2: Open a blank PPT slide
+mkppt <- PPT.Init (method = "RDCOMClient")
+mkppt <- PPT.AddBlankSlide(mkppt)
+
+## Step 3: Export graph to PPT slide
+mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
+
+unlink(TEMP_FILE)
+
+######################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### Tables of studies ====
 
 #### ALL ====
@@ -275,6 +368,7 @@ View(Freq_Study)
 ### Proportion of studies without Prev Data
 (116-64)/116 #0.44827
 
+
 Freq_Spp <- OsHV1 %>%
   filter(Prevalence != "NA") %>% 
   select(Species, Prevalence) %>%
@@ -362,7 +456,6 @@ Prev_SppCountry.plot <- ggplot(aes(x = Country, y = mean_prev, group = OsHV_var,
 Prev_SppCountry.plot
 
 
-
 Prev_Country <- OsHV1 %>%
   filter(Prevalence != "NA",
          Country != "NA") %>% 
@@ -442,6 +535,69 @@ Prev_SppVar.plot <- ggplot(aes(x = Species, y = mean_prev, group = OsHV_var, fil
   coord_flip()
 
 Prev_SppVar.plot
+
+##############################################
+
+Prev_YearCountry <- OsHV1 %>%
+  filter(Prevalence != "NA",
+         OsHV_var != c("Herpes-like virus", "Herpesvirus", "OsHV")) %>% 
+  select(Species, Prevalence, Country,Year_Sampled, OsHV_var) %>%
+  group_by(Country, Year_Sampled, OsHV_var) %>% 
+  reframe(mean_prev = mean(Prevalence),
+          SD_prev = sd(Prevalence),
+          SE_prev = SD_prev/sqrt(n())) %>% 
+  arrange(Country)
+
+View(Prev_YearCountry)
+
+
+Prev_YearCountry.plot <- ggplot(aes(x = Year_Sampled, y = mean_prev, color = OsHV_var), data = Prev_YearCountry) +
+  facet_wrap(Country~.) +
+  geom_point() +
+  #geom_col(position=position_dodge2(preserve = "single")) +
+  geom_errorbar(aes(ymin = mean_prev-SE_prev, ymax = mean_prev + SE_prev), width=.1, position=position_dodge(.9)) +
+  scale_color_manual(values=c("#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58", "#D53E4F")) +
+  scale_x_continuous(limits = c(1990, 2023), breaks = c(1990, 2000, 2010, 2020)) +
+  theme_classic()+
+  theme(axis.text.x = element_text(angle=90, hjust=1)) #+
+  #coord_flip()
+
+Prev_YearCountry.plot
+
+
+#### ** PPT: Prevalence - Countries by Year ==============
+
+#### officeR directly exports the plot to your desired file into a powerpoint slide-shaped image ===== 
+library(officer)
+## initialize R object representing .pptx file. 
+Prev_YearCountry.plot_fig <- read_pptx()
+Prev_YearCountry.plot_fig <- add_slide(Prev_YearCountry.plot_fig , layout = "Title and Content", master = "Office Theme")
+Prev_YearCountry.plot_fig <-  ph_with(x = Prev_YearCountry.plot_fig, value = Prev_YearCountry.plot, location = ph_location_fullsize() )
+Prev_YearCountry.plot_fig  <- ph_with(x = Prev_YearCountry.plot_fig, "Plot", location = ph_location_type(type = "title") )
+print(Prev_YearCountry.plot_fig, target = "presentations/plot.pptx")
+
+#### R2PPT / RDCOMClient =====
+
+#install.packages("devtools", dependencies = TRUE)
+
+library(RDCOMClient)
+library(R2PPT)
+
+## Step 1: Save as a temporary file
+TEMP_FILE <- paste(tempfile(), ".wmf", sep="")
+ggsave(TEMP_FILE, plot = Prev_YearCountry.plot) # Saving the plot to the temporary file
+
+
+## Step 2: Open a blank PPT slide
+mkppt <- PPT.Init (method = "RDCOMClient")
+mkppt <- PPT.AddBlankSlide(mkppt)
+
+## Step 3: Export graph to PPT slide
+mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
+
+unlink(TEMP_FILE)
+
+######################################################
 
 
 #### INTENSITY ====

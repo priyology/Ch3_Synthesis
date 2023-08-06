@@ -1,0 +1,42 @@
+Country,OsHV_var,minYear,position,direction,text_position
+France,Herpes-like virus,1991,1,1,1.01
+New Zealand,Herpesvirus,1991,-0.5,-1,-0.51
+France,Herpesvirus,1992,-1,-1,-1.01
+France,OsHV-1,1993,1.5,1,1.51
+Australia,Herpes-like virus,1994,-0.5,-1,-0.51
+Spain,OsHV-1,1997,-0.5,-1,-1.06
+United Kingdom,OsHV-1,1997,-1,-1,-1.01
+France,OsHV-1 uVar,1998,-1.5,-1,-1.51
+China,OsHV-1,1999,-0.5,-1,-1.56
+Japan,OsHV-1,1999,-1.5,-1,-1.51
+New Zealand,OsHV-1 uVar,1999,-1,-1,-1.61
+Mexico,OsHV-1 uVar,2000,-1.5,-1,-1.51
+Ireland,OsHV-1,2001,-0.5,-1,-0.51
+Greece,OsHV-1,2002,0.5,1,0.51
+USA,Herpesvirus,2002,-1.5,-1,-1.51
+Ireland,OsHV-1 uVar,2003,1,1,1.01
+USA,OsHV,2003,0.5,1,1.11
+USA,OsHV-1,2003,-0.5,-1,-0.51
+USA,OsHV-1 uVar,2003,1,1,1.06
+Korea,OsHV-1,2004,-0.5,-1,-1.56
+Portugal,OsHV-1,2004,-1.5,-1,-1.51
+Spain,OsHV-1 uVar,2005,1,1,1.01
+China,AVNV,2007,0.5,1,0.51
+United Kingdom,OsHV-1 uVar,2008,1.5,1,1.51
+Australia,OsHV-1 uVar,2010,1.5,1,1.61
+Italy,OsHV-1 uVar,2010,1.5,1,1.56
+New Zealand,OsHV-1,2010,1,1,1.66
+Norway,OsHV-1 uVar,2010,1.5,1,1.51
+Australia,OsHV-1,2011,1,1,1.06
+Australia,OsHV-1 non-uVar variant,2011,-1,-1,-1.06
+Italy,OsHV-1,2011,-1,-1,-1.01
+Korea,OsHV-1 uVar,2011,1,1,1.01
+Portugal,OsHV-1 uVar,2011,0.5,1,1.11
+Japan,OsHV-1 uVar,2012,0.5,1,1.56
+Mexico,OsHV-1,2012,1.5,1,1.51
+Netherlands,OsHV-1 uVar,2012,0.5,1,1.61
+Sweden,OsHV-1,2012,-1,-1,-1.01
+Brazil,OsHV-1,2013,-1.5,-1,-1.51
+Sweden,OsHV-1 uVar,2013,1.5,1,1.56
+Argentina,OsHV-1 uVar,2017,0.5,1,0.51
+Mexico,AVNV,2017,-1,-1,-1.01
