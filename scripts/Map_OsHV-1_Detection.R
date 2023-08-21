@@ -13,7 +13,7 @@ library(cowplot)
 ## ggMgigas intro: https://appsilon.com/r-ggMgigas/
 
 #### load data ==============
-OsHV1 <- read_csv("data/OsHV1infections_30Jul2023.csv")
+OsHV1 <- read_csv("data/OsHV1infections_19Aug2023.csv")
 glimpse(OsHV1)
 
 unique(OsHV1$OsHV_var)
@@ -33,7 +33,7 @@ MgigasFreq <- OsHV1 %>%
 
 MgigasFreq
 
-Country.Plot <- Mgigas %>%
+Country.Plot <- MgigasFreq %>%
   group_by(Country, OsHV_var) %>%
   #filter(OsHV_var != "Herpesvirus" | OsHV_var != "Herpes-like virus" | OsHV_var != "AVNV") %>%   
   #reframe(count = n()) %>% 
@@ -90,32 +90,39 @@ Mgigas
 ## unique species
 unique(Mgigas$Paper) #75
 unique(Mgigas$Country) #18 + NA
-unique(Mgigas$Species) #1
+unique(Mgigas$Species) #1s
 
+######## 1991 - 2000 ==========================
+
+Mgigas_91_00 <- OsHV1 %>% 
+  filter(Taxa == "Pacific Oyster",
+         Year_Sampled >= "1990" & Year_Sampled <= "2000")
+
+View(Mgigas_91_00)
 
 ## OsHV-1
-Mgigas %>% 
+Mgigas_91_00 %>% 
   group_by(Country) %>%
   filter(OsHV_var == "OsHV-1") %>% 
   reframe(count = n()) #14 countries
-  
+
 ## Not OsHV-1
-Mgigas %>% 
+Mgigas_91_00 %>% 
   group_by(Country) %>%
   reframe(count = n()) #18 countries
 
 ## OsHV-1 type
 
 
-unique(Mgigas$OsHV_var)
-# [1] "OsHV-1"                  "OsHV-1 μVar"             "Herpes-like virus"      
-# [4] "Herpesvirus"             "AVNV"                    "OsHV-1 non-μvar variant"
+unique(Mgigas_91_00$OsHV_var)
+# [1] "OsHV-1"            "Herpes-like virus" "Herpesvirus"      
+# [4] "OsHV-1 μVar" 
 
 #### OsHV-1 coords ==============
 
-glimpse(Mgigas)
+glimpse(Mgigas_91_00)
 
-OsHV1_coord <- Mgigas %>% 
+OsHV1_coord <- Mgigas_91_00 %>% 
   filter(OsHV_var == "OsHV-1",
          !is.na(GPS_lat),
          !is.na(GPS_long))
@@ -143,7 +150,7 @@ OsHV1Sites.df <- data.frame(
 glimpse(OsHV1Sites.df)
 
 #### OsHV-1 μVar data ==============
-OsHV1Var_coord <- Mgigas %>% 
+OsHV1Var_coord <- Mgigas_91_00 %>% 
   filter(OsHV_var == "OsHV-1 μVar",
          !is.na(GPS_lat),
          !is.na(GPS_long))
@@ -169,63 +176,8 @@ VarSites.df <- data.frame(
 
 glimpse(VarSites.df)
 
-
-#### OsHV-1 non-μVar data ==============
-OsHV1nonVar_coord <- Mgigas %>% 
-  filter(OsHV_var == "OsHV-1 non-μvar variant",
-         !is.na(GPS_lat),
-         !is.na(GPS_long))
-
-OsHV1nonVar_coord$GPS_lat <- as.double(OsHV1nonVar_coord$GPS_lat)
-OsHV1nonVar_coord$GPS_lat
-
-OsHV1nonVar_coord$GPS_long <- as.double(OsHV1nonVar_coord$GPS_long)
-OsHV1nonVar_coord$GPS_long
-
-
-### latitudes
-Mgigas_nonVarlat <- OsHV1nonVar_coord$GPS_lat
-Mgigas_nonVarlat
-
-### longitudes
-Mgigas_nonVarlong <- OsHV1nonVar_coord$GPS_long
-Mgigas_nonVarlong
-
-nonVarSites.df <- data.frame(
-  lon = Mgigas_nonVarlong,
-  lat = Mgigas_nonVarlat)
-
-glimpse(nonVarSites.df)
-
-#### AVNV data ==============
-AVNV_coord <- Mgigas %>% 
-  filter(OsHV_var == "AVNV",
-         !is.na(GPS_lat),
-         !is.na(GPS_long))
-
-AVNV_coord$GPS_lat <- as.double(AVNV_coord$GPS_lat)
-AVNV_coord$GPS_lat
-
-AVNV_coord$GPS_long <- as.double(AVNV_coord$GPS_long)
-AVNV_coord$GPS_long
-
-
-### latitudes
-Mgigas_ANVNlat <- AVNV_coord$GPS_lat
-Mgigas_ANVNlat
-
-### longitudes
-Mgigas_ANVNlong <- AVNV_coord$GPS_long
-Mgigas_ANVNlong
-
-AVNVSites.df <- data.frame(
-  lon = Mgigas_ANVNlong,
-  lat = Mgigas_ANVNlat)
-
-glimpse(AVNVSites.df)
-
 #### Herpesvirus data ==============
-Herp_coord <- Mgigas %>% 
+Herp_coord <- Mgigas_91_00 %>% 
   filter(OsHV_var == "Herpesvirus",
          !is.na(GPS_lat),
          !is.na(GPS_long))
@@ -252,7 +204,7 @@ HerpSites.df <- data.frame(
 glimpse(HerpSites.df)
 
 #### Herpes-like data ==============
-herpL_coord <- Mgigas %>% 
+herpL_coord <- Mgigas_91_00 %>% 
   filter(OsHV_var == "Herpes-like virus",
          !is.na(GPS_lat),
          !is.na(GPS_long))
@@ -278,8 +230,163 @@ herpLSites.df <- data.frame(
 
 glimpse(herpLSites.df)
 
+## get Mgigass API Key
+register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigas API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
+
+#create a data.fame
+#sites.df <- data.frame(
+#  lon = Spp_long,
+#  lat = Spp_lat)
+# glimpse(sites.df)
+
+#sites.labels <- data.frame(
+#lon = c(-122.947833, -122.927504, -122.865700),
+#lat = c(38.218050, 38.205616, 38.120200),
+#site.name = c("HI", "BB", "TB"))
+#glimpse(sites.labels)
+
+#load a googlemaps 
+get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, scale = 2,  maptype = "hybrid") %>% ggmap()
+
+
+## generate high quality ggmap() using geom_point() to generate markers
+
+# satellite style Mgigas of California with Zoom
+Detection_Mgigas_91_00 <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
+
+ggmap(Detection_Mgigas_91_00) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
+
+
+# Tone-Lite Mgigas_91_00
+qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
+
+# Watercolor Mgigas_91_00
+qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
+
+######## 2001 - 2010 ==========================
+# M. gigas detections only
+Mgigas_01_10 <- OsHV1 %>% 
+  filter(Taxa == "Pacific Oyster",
+         Year_Sampled >= "2001" & Year_Sampled <= "2010")
+
+View(Mgigas_01_10)
+
+## OsHV-1
+Mgigas_01_10 %>% 
+  group_by(Country) %>%
+  filter(OsHV_var == "OsHV-1") %>% 
+  reframe(count = n()) #14 countries
+
+## Not OsHV-1
+Mgigas_01_10 %>% 
+  group_by(Country) %>%
+  reframe(count = n()) #11 countries
+
+## OsHV-1 type
+
+
+unique(Mgigas_01_10$OsHV_var)
+# [1] "OsHV-1"      "OsHV-1 μVar" "Herpesvirus" "OsHV"  
+
+#### OsHV-1 coords ==============
+
+glimpse(Mgigas_01_10)
+
+OsHV1_coord <- Mgigas_01_10 %>% 
+  filter(OsHV_var == "OsHV-1",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+glimpse(OsHV1_coord)
+
+OsHV1_coord$GPS_lat <- as.double(OsHV1_coord$GPS_lat)
+OsHV1_coord$GPS_lat
+
+OsHV1_coord$GPS_long <- as.double(OsHV1_coord$GPS_long)
+OsHV1_coord$GPS_long
+
+### latitudes
+Mgigas_OsHV1_lat <- OsHV1_coord$GPS_lat
+Mgigas_OsHV1_lat
+
+### longitudes
+Mgigas_OsHV1long <- OsHV1_coord$GPS_long
+Mgigas_OsHV1long
+
+OsHV1Sites.df <- data.frame(
+  lon = Mgigas_OsHV1long,
+  lat = Mgigas_OsHV1_lat)
+
+glimpse(OsHV1Sites.df)
+
+#### OsHV-1 μVar data ==============
+OsHV1Var_coord <- Mgigas_01_10 %>% 
+  filter(OsHV_var == "OsHV-1 μVar",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+OsHV1Var_coord$GPS_lat <- as.double(OsHV1Var_coord$GPS_lat)
+OsHV1Var_coord$GPS_lat
+
+OsHV1Var_coord$GPS_long <- as.double(OsHV1Var_coord$GPS_long)
+OsHV1Var_coord$GPS_long
+
+
+### latitudes
+Mgigas_Varlat <- OsHV1Var_coord$GPS_lat
+Mgigas_Varlat
+
+### longitudes
+Mgigas_Varlong <- OsHV1Var_coord$GPS_long
+Mgigas_Varlong
+
+VarSites.df <- data.frame(
+  lon = Mgigas_Varlong,
+  lat = Mgigas_Varlat)
+
+glimpse(VarSites.df)
+
+#### Herpesvirus data ==============
+Herp_coord <- Mgigas_01_10 %>% 
+  filter(OsHV_var == "Herpesvirus",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+Herp_coord$GPS_lat <- as.double(Herp_coord$GPS_lat)
+Herp_coord$GPS_lat
+
+Herp_coord$GPS_long <- as.double(Herp_coord$GPS_long)
+Herp_coord$GPS_long
+
+
+### latitudes
+Mgigas_Herplat <- Herp_coord$GPS_lat
+Mgigas_Herplat
+
+### longitudes
+Mgigas_Herplong <- Herp_coord$GPS_long
+Mgigas_Herplong
+
+HerpSites.df <- data.frame(
+  lon = Mgigas_Herplong,
+  lat = Mgigas_Herplat)
+
+glimpse(HerpSites.df)
+
 #### OsHV data ==============
-herpz_coord <- Mgigas %>% 
+herpz_coord <- Mgigas_01_10 %>% 
   filter(OsHV_var == "OsHV",
          !is.na(GPS_lat),
          !is.na(GPS_long))
@@ -327,36 +434,216 @@ get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, sca
 ## generate high quality ggmap() using geom_point() to generate markers
 
 # satellite style Mgigas of California with Zoom
-Detection_Mgigas <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
+Detection_Mgigas_01_10 <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
 
-ggmap(Detection_Mgigas) +
+ggmap(Detection_Mgigas_01_10) +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 4) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 4) +
   geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
   geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
-  
+
 
 # Tone-Lite Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
-  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 4) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 4) +
   geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 4) +
   geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
 
+
+# Watercolor Mgigas
+qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 4) +
+  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 4)
+
+######## 2011 - 2022 ==========================
+
+# M. gigas detections only
+Mgigas_11_22 <- OsHV1 %>% 
+  filter(Taxa == "Pacific Oyster",
+         Year_Sampled >= "2011" & Year_Sampled <= "2022")
+
+View(Mgigas_11_22)
+
+## unique species
+unique(Mgigas_11_22$Paper) #75
+unique(Mgigas_11_22$Country) #18 + NA
+unique(Mgigas_11_22$Species) #1
+
+
+## OsHV-1
+Mgigas_11_22 %>% 
+  group_by(Country) %>%
+  filter(OsHV_var == "OsHV-1") %>% 
+  reframe(count = n()) #14 countries
+
+## Not OsHV-1
+Mgigas_11_22 %>% 
+  group_by(Country) %>%
+  reframe(count = n()) #18 countries
+
+## OsHV-1 type
+
+
+unique(Mgigas_11_22$OsHV_var)
+#[1] "OsHV-1"                  "OsHV-1 μVar"             "AVNV"                   
+#[4] "OsHV-1 non-μvar variant"
+
+#### OsHV-1 coords ==============
+
+glimpse(Mgigas_11_22)
+
+OsHV1_coord <- Mgigas_11_22 %>% 
+  filter(OsHV_var == "OsHV-1",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+glimpse(OsHV1_coord)
+
+OsHV1_coord$GPS_lat <- as.double(OsHV1_coord$GPS_lat)
+OsHV1_coord$GPS_lat
+
+OsHV1_coord$GPS_long <- as.double(OsHV1_coord$GPS_long)
+OsHV1_coord$GPS_long
+
+### latitudes
+Mgigas_OsHV1_lat <- OsHV1_coord$GPS_lat
+Mgigas_OsHV1_lat
+
+### longitudes
+Mgigas_OsHV1long <- OsHV1_coord$GPS_long
+Mgigas_OsHV1long
+
+OsHV1Sites.df <- data.frame(
+  lon = Mgigas_OsHV1long,
+  lat = Mgigas_OsHV1_lat)
+
+glimpse(OsHV1Sites.df)
+
+#### OsHV-1 μVar data ==============
+OsHV1Var_coord <- Mgigas_11_22 %>% 
+  filter(OsHV_var == "OsHV-1 μVar",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+OsHV1Var_coord$GPS_lat <- as.double(OsHV1Var_coord$GPS_lat)
+OsHV1Var_coord$GPS_lat
+
+OsHV1Var_coord$GPS_long <- as.double(OsHV1Var_coord$GPS_long)
+OsHV1Var_coord$GPS_long
+
+
+### latitudes
+Mgigas_Varlat <- OsHV1Var_coord$GPS_lat
+Mgigas_Varlat
+
+### longitudes
+Mgigas_Varlong <- OsHV1Var_coord$GPS_long
+Mgigas_Varlong
+
+VarSites.df <- data.frame(
+  lon = Mgigas_Varlong,
+  lat = Mgigas_Varlat)
+
+glimpse(VarSites.df)
+
+
+#### OsHV-1 non-μVar data ==============
+OsHV1nonVar_coord <- Mgigas_11_22 %>% 
+  filter(OsHV_var == "OsHV-1 non-μvar variant",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+OsHV1nonVar_coord$GPS_lat <- as.double(OsHV1nonVar_coord$GPS_lat)
+OsHV1nonVar_coord$GPS_lat
+
+OsHV1nonVar_coord$GPS_long <- as.double(OsHV1nonVar_coord$GPS_long)
+OsHV1nonVar_coord$GPS_long
+
+
+### latitudes
+Mgigas_nonVarlat <- OsHV1nonVar_coord$GPS_lat
+Mgigas_nonVarlat
+
+### longitudes
+Mgigas_nonVarlong <- OsHV1nonVar_coord$GPS_long
+Mgigas_nonVarlong
+
+nonVarSites.df <- data.frame(
+  lon = Mgigas_nonVarlong,
+  lat = Mgigas_nonVarlat)
+
+glimpse(nonVarSites.df)
+
+#### AVNV data ==============
+AVNV_coord <- Mgigas_11_22 %>% 
+  filter(OsHV_var == "AVNV",
+         !is.na(GPS_lat),
+         !is.na(GPS_long))
+
+AVNV_coord$GPS_lat <- as.double(AVNV_coord$GPS_lat)
+AVNV_coord$GPS_lat
+
+AVNV_coord$GPS_long <- as.double(AVNV_coord$GPS_long)
+AVNV_coord$GPS_long
+
+
+### latitudes
+Mgigas_ANVNlat <- AVNV_coord$GPS_lat
+Mgigas_ANVNlat
+
+### longitudes
+Mgigas_ANVNlong <- AVNV_coord$GPS_long
+Mgigas_ANVNlong
+
+AVNVSites.df <- data.frame(
+  lon = Mgigas_ANVNlong,
+  lat = Mgigas_ANVNlat)
+
+glimpse(AVNVSites.df)
+
+## get Mgigass API Key
+register_google(key = "AIzaSyAPHAhoKrfamwGo3d06FAirHsuqU6dOvZM", write = TRUE) #that is my "Mgigas API Key": https://console.cloud.google.com/apis/credentials?project=garbage-cat 
+
+#create a data.fame
+#sites.df <- data.frame(
+#  lon = Spp_long,
+#  lat = Spp_lat)
+# glimpse(sites.df)
+
+#sites.labels <- data.frame(
+#lon = c(-122.947833, -122.927504, -122.865700),
+#lat = c(38.218050, 38.205616, 38.120200),
+#site.name = c("HI", "BB", "TB"))
+#glimpse(sites.labels)
+
+#load a googlemaps 
+get_googlemap(center = "Atlantic Ocean", zoom = 1, markers = nonVarSites.df, scale = 2,  maptype = "hybrid") %>% ggmap()
+
+
+## generate high quality ggmap() using geom_point() to generate markers
+
+# satellite style Mgigas of California with Zoom
+Detection_Mgigas_11_22 <- get_map("Atlantic Ocean", zoom =  1, maptype = "satellite")
+
+ggmap(Detection_Mgigas_11_22) +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 4) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 4)
+ 
+# Tone-Lite Mgigas
+qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "toner-lite") +
+  geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 4) +
+  geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 4) +
+  geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 4) +
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 4)
 
 # Watercolor Mgigas
 qmap("Atlantic Ocean", zoom = 1, scale = 2, source = "stamen", maptype = "watercolor") + ## Tomales Bay - Artistic
   geom_point(data = VarSites.df, aes(x = lon, y = lat), color = '#D53E4F', alpha = 0.7,  size = 5) +
   geom_point(data = OsHV1Sites.df, aes(x = lon, y = lat), color = '#FFDB58', alpha = 0.7,  size = 5) +
   geom_point(data = AVNVSites.df, aes(x = lon, y = lat), color = "#4DA8F9", alpha = 0.7,  size = 5) +
-  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 5) +
-  geom_point(data = herpzSites.df, aes(x = lon, y = lat), color = '#a700a7', alpha = 0.7,  size = 5) +
-  geom_point(data = herpLSites.df, aes(x = lon, y = lat), color = '#4DAF4A', alpha = 0.7,  size = 5) +
-  geom_point(data = HerpSites.df, aes(x = lon, y = lat), color = '#00fa9a', alpha = 0.7,  size = 5)
-  
+  geom_point(data = nonVarSites.df, aes(x = lon, y = lat), color = '#FF7F00', alpha = 0.7,  size = 5)

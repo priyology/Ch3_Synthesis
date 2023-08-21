@@ -396,8 +396,6 @@ Freq_Var <- OsHV1 %>%
 
 View(Freq_Var)
 
-
-## Prev Data
 Prev_Var <- OsHV1 %>%
   filter(Prevalence != "NA") %>% 
   select(OsHV_var, Prevalence) %>%
