@@ -5,7 +5,7 @@ library(gtsummary)
 
 
 ### load data
-OsHV1 <- read_csv("data/OsHV1infections_30Jul2023.csv")
+OsHV1 <- read_csv("data/OsHV1infections_19Aug2023.csv")
 glimpse(OsHV1)
 
 unique(OsHV1$Study_numb)
@@ -139,17 +139,6 @@ mkppt <- PPT.AddGraphicstoSlide(mkppt, file = TEMP_FILE)
 unlink(TEMP_FILE)
 
 ######################################################
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -554,8 +543,10 @@ Prev_YearCountry.plot <- ggplot(aes(x = Year_Sampled, y = mean_prev, color = OsH
   geom_point() +
   #geom_col(position=position_dodge2(preserve = "single")) +
   geom_errorbar(aes(ymin = mean_prev-SE_prev, ymax = mean_prev + SE_prev), width=.1, position=position_dodge(.9)) +
+  geom_smooth(method = lm, se = FALSE) +
   scale_color_manual(values=c("#4DAF4A", "#00fa9a", "#a700a7", "#FFDB58", "#D53E4F")) +
   scale_x_continuous(limits = c(1990, 2023), breaks = c(1990, 2000, 2010, 2020)) +
+  ylim(0, 1) +
   theme_classic()+
   theme(axis.text.x = element_text(angle=90, hjust=1)) #+
   #coord_flip()
